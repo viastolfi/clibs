@@ -13,6 +13,7 @@ API:
 
     queue_t* queue_init();
     int queue_add(queue_t* q, void* obj);
+    int queue_add_many(queue_t* q, ...);
     int queue_free(queue_t* q);
     void* queue_dequeue(queue_t* q);
 
@@ -45,6 +46,7 @@ EXAMPLE:
         char* foo = "foo";
         char* bar = "bar";
         char* baz = "baz";
+        char* qux = "qux";
 
         queue_t* queue;
 
@@ -53,9 +55,8 @@ EXAMPLE:
 
         if(!queue_add(queue, foo))
             return 1;
-        if(!queue_add(queue, bar))
-            return 1;
-        if(!queue_add(queue, baz))
+
+        if(!queue_add_many(queue, bar, baz, qux))
             return 1;
 
         char* c;
