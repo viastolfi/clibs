@@ -101,6 +101,8 @@ EXAMPLE:
     #define QUEUE_FREE free
 #endif // QUEUE_FREE
 
+#include <stdarg.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -131,6 +133,8 @@ QUEUE_LIB int queue_free(queue_t* q);
 QUEUE_LIB void* queue_dequeue(queue_t* q);
 
 #ifdef QUEUE_LIB_IMPLEMENTATION
+
+#define queue_add_many(q, ...) queue_add_many_null(q, __VA_ARGS__, NULL)
 
 QUEUE_LIB queue_t* queue_init()
 {
@@ -177,6 +181,25 @@ QUEUE_LIB int queue_add(queue_t* q, void* obj)
     q->size++;
 
     QUEUE_MUTEX_UNLOCK(q->mutex);
+    return 1;
+}
+
+static int queue_add_many_null(queue_t* q, ...)
+{
+    if (!q) return 0;
+
+    va_list args;
+    va_start(args, q);
+
+    void* obj;
+    while ((obj = va_arg(args, void*)) != NULL) {
+        if (!queue_add(q, obj)) {
+            va_end(args);
+            return 0;
+        }
+    }
+
+    va_end(args);
     return 1;
 }
 

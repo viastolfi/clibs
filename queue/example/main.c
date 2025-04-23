@@ -10,6 +10,7 @@ int main(void)
     char* a = "foo";
     char* b = "bar";
     char* c = "baz";
+    char* d = "QUX";
 
     queue_t* queue;
     if((queue = queue_init()) == NULL)
@@ -18,12 +19,15 @@ int main(void)
         exit(errno);
     }
 
-    if( 
-        !queue_add(queue, a) ||
-        !queue_add(queue, b) ||
-        !queue_add(queue, c))
+    if(!queue_add(queue, a))
     {
         perror("error on add");
+        exit(errno);
+    }
+
+    if(!queue_add_many(queue, b, c, d))
+    {
+        perror("error on add_many");
         exit(errno);
     }
 
@@ -34,8 +38,14 @@ int main(void)
         exit(errno);
     }
 
-    // expected foo
-    printf("value in dequeued : %s\n", i);
+    printf("EXPECT : foo , GET : %s\n", i);
+
+   if((i = (char*) queue_dequeue(queue)) == NULL)
+    {
+        perror("error on dequeue");
+        exit(errno);
+    } 
+    printf("EXPECT : bar , GET : %s\n", i);
 
     if(!queue_free(queue))
     {
