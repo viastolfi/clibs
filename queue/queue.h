@@ -1,3 +1,80 @@
+/*
+------------------------------------------------------------------------------
+QUEUE LIB FOR C - ASTOLFI Vincent 2025
+
+Usage:
+
+    #define QUEUE_LIB_IMPLEMENTATION
+    // if no thread concurrencie in your program
+    #define QUEUE_NO_THREADING
+    #include "queue.h"
+
+API:
+
+    queue_t* queue_init();
+    int queue_add(queue_t* q, void* obj);
+    int queue_free(queue_t* q);
+    void* queue_dequeue(queue_t* q);
+
+RETURNS:
+
+    - queue_init()
+    return the new created queue, NULL on error
+
+    - queue_add()
+    return 1 on success, 0 on error
+
+    - queue_free()
+    return 1 on success, 0 on error
+
+    - queue_dequeue()
+    return front object of the queue, NULL on error
+
+EXAMPLE:
+
+    ```c
+    #define QUEUE_LIB_IMPLEMENTATION
+    #define QUEUE_NO_THREADING
+    #include "queue.h"
+
+    #include <stdlib.h>
+    #include <stdio.h>
+
+    int main(void)
+    {
+        char* foo = "foo";
+        char* bar = "bar";
+        char* baz = "baz";
+
+        queue_t* queue;
+
+        if((queue = queue_init()) == NULL)
+            return 1;
+
+        if(!queue_add(queue, foo))
+            return 1;
+        if(!queue_add(queue, bar))
+            return 1;
+        if(!queue_add(queue, baz))
+            return 1;
+
+        char* c = malloc(4);
+        if((c = queue_dequeue(queue)) == NULL)
+            return 1;
+
+        printf("EXPECT : foo , GET : %s/n", c);
+
+        if(!queue_free(queue))
+            return 1;
+
+        free(c);
+            
+        return 0;
+    }
+    ```
+------------------------------------------------------------------------------
+*/
+
 #ifndef QUEUE_H
 #define QUEUE_H
 
