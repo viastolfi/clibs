@@ -11,8 +11,8 @@ The goal is to train myself in C and to try to write well written, reusable sing
 All the libs are self documented in the .h file and examples are shown for each one.
 
 > [!WARNING]
-> Those libs are written in my free time, I can't assure they answer your need and they may not be maintained are working as intended.
-> You them at your own risk
+> Those libs are written in my free time, I can't assure they answer your need and they may not be maintained or working as intended.
+> Use them at your own risk
 
 ## Requirement 
 
