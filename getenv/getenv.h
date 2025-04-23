@@ -45,6 +45,10 @@ typedef struct
 #define load_env getenv_load_env
 #endif // load_env
 
+#ifndef get_env
+#define get_env getenv_get_env
+#endif // get_env
+
 #define _getenv_peek(...) _getenv_peek_impl ## __VA_OPT__(1)(__VA_ARGS__)
 #define _getenv_peek_impl1(...) getenv_peek(__VA_ARGS__)
 #define _getenv_peek_impl(...) getenv_peek(0)
