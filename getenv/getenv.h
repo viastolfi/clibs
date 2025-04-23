@@ -96,6 +96,11 @@ extern "C" {
 #define GETENV_REALLOC realloc
 #endif // GETENV_REALLOC
 
+#ifndef GETENV_FREE
+#include <stdlib.h>
+#define GETENV_FREE free
+#endif // GETENV_FREE
+
 #include <stdio.h>
 #include <string.h>
 
@@ -103,7 +108,8 @@ typedef enum
 {
   GETENV_ERR_NONE = 0,
   GETENV_ERR_KEY_NOT_FOUND,
-  GETENV_ERR_FILE_NOT_FOUND
+  GETENV_ERR_FILE_NOT_FOUND,
+  GETENV_ERR_MEMORY
 } getenv_err_t;
 
 typedef struct
@@ -202,13 +208,14 @@ GETENV_LIB int load_env(char* path)
   env.getenv_content = malloc(length + 1);
   if(env.getenv_content)
   {
-      size_t bytes_read = fread(env.getenv_content, 1, length, f);
-      env.getenv_content[bytes_read] = '\0';
+    size_t bytes_read = fread(env.getenv_content, 1, length, f);
+    env.getenv_content[bytes_read] = '\0';
   }
   else
   {
-      fclose(f);
-      return 0;
+    getenv_last_error = GETENV_ERR_MEMORY; 
+    fclose(f);
+    return 0;
   }
 
   fclose(f);
@@ -220,13 +227,18 @@ GETENV_LIB int load_env(char* path)
         if(c.value == '\n')
         {
             dump = _getenv_consume();
-            free(dump);
+            GETENV_FREE(dump);
             dump = NULL;
             continue;
         }
 
         env.vars_count++;
         env.vars = (getenv_var_t*) GETENV_REALLOC(env.vars, env.vars_count * sizeof(getenv_var_t));
+        if(env.vars == NULL)
+        {
+          getenv_last_error = GETENV_ERR_MEMORY;
+          return 0;
+        }
         key_length = 0;
         value_length = 0;
 
@@ -237,13 +249,18 @@ GETENV_LIB int load_env(char* path)
             key_length++;
         }
 
-        env.vars[env.vars_count - 1].key = malloc(key_length + 1);
+        env.vars[env.vars_count - 1].key = GETENV_MALLOC(key_length + 1);
+        if(env.vars[env.vars_count - 1].key == NULL)
+        {
+          getenv_last_error = GETENV_ERR_MEMORY;
+          return 0;
+        }
         strcpy(env.vars[env.vars_count - 1].key, _getenv_consume(key_length));
 
         // we consume the '='
         {
             dump = _getenv_consume();
-            free(dump);
+            GETENV_FREE(dump);
             dump = NULL;
         }
 
@@ -255,7 +272,12 @@ GETENV_LIB int load_env(char* path)
             value_length++;
         }
 
-        env.vars[env.vars_count - 1].value = malloc(value_length + 1);
+        env.vars[env.vars_count - 1].value = GETENV_MALLOC(value_length + 1);
+        if(env.vars[env.vars_count - 1].value == NULL)
+        {
+          getenv_last_error = GETENV_ERR_MEMORY;
+          return 0;
+        }
         strcpy(env.vars[env.vars_count - 1].value, _getenv_consume(value_length));
     }
   }
@@ -282,6 +304,7 @@ GETENV_LIB char* getenv_strerror()
     case GETENV_ERR_NONE: return "No error";
     case GETENV_ERR_KEY_NOT_FOUND: return "Key not found";
     case GETENV_ERR_FILE_NOT_FOUND: return "Env file not found";
+    case GETENV_ERR_MEMORY: return "Memory related error";
   }
 }
 
