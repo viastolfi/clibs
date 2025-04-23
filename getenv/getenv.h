@@ -1,3 +1,79 @@
+/*
+------------------------------------------------------------------------------
+GETENV LIB FOR C - ASTOLFI Vincent 2025
+
+Usage:
+
+    #define GETENV_LIB_IMPLEMENTATION
+    #include "getenv.h"
+
+API:
+
+    int getenv_load_env(char* path);
+    char* getenv_get_env(char* key);
+    char* getenv_strerror();
+
+MACROS:
+    
+    if they are not already defined you can have access to macros to shortten function name
+
+    load_env ->  getenv_load_env
+    get_env  ->  getenv_get_env
+
+    macros also exist to improve interface
+
+    GETENV_OK -> return 1 if last error is GETENV_ERR_NONE, 0 otherwise
+
+RETURNS:
+
+    - getenv_load_env()
+    return 1 on success, 0 on error
+
+    - getenv_get_env()
+    return value assiocated with a key, NULL if key not found
+
+    - getenv_strerror()
+    return string corresponding to the last error
+
+ERRORS:
+  
+  GETENV_ERR_NONE          
+  GETENV_ERR_KEY_NOT_FOUND
+
+EXAMPLE:
+
+    ```c
+    #define GETENV_LIB_IMPLEMENTATION
+    #include "../getenv.h"
+
+    #include <stdio.h>
+
+    int main(void)
+    {
+      if(!load_env("./.env") || !GETENV_OK)
+      {
+        fprintf(stderr, "Load failed : %s\n", getenv_strerror());
+        return 1;
+      }
+
+      char *c = get_env("FOO");
+      char *d = get_env("BAZ");
+
+      if(c == NULL || d == NULL || !GETENV_OK)
+      {
+        fprintf(stderr, "Missing key: %s\n", getenv_strerror());
+        return 1;
+      }
+
+      printf("EXPECT: BAR, GET : %s\n", c);
+      printf("EXPECT: QUX, GET : %s\n", d);
+
+      return 0;
+    }
+    ```
+------------------------------------------------------------------------------
+*/
+
 #ifndef GETENV_H
 #define GETENV_H
 
