@@ -205,7 +205,7 @@ GETENV_LIB int load_env(char* path)
   fseek(f, 0, SEEK_END);
   length = ftell(f);
   fseek(f, 0, SEEK_SET);
-  env.getenv_content = malloc(length + 1);
+  env.getenv_content = GETENV_MALLOC(length + 1);
   if(env.getenv_content)
   {
     size_t bytes_read = fread(env.getenv_content, 1, length, f);
