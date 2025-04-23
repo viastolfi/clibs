@@ -62,7 +62,7 @@ EXAMPLE:
         if((c = queue_dequeue(queue)) == NULL)
             return 1;
 
-        printf("EXPECT : foo , GET : %s/n", c);
+        printf("EXPECT : foo , GET : %s \n", c);
 
         if(!queue_free(queue))
             return 1;
