@@ -21,3 +21,4 @@ All the libs are self documented in the .h file and examples are shown for each 
 ## Author 
 
 This project is entirely made by me (ASTOLFI Vincent). I suggest you to check on my [github profile](https://www.github.com/viastolfi) if you want to see the other project I've done for my studies or the ones I do in my free time.
+
