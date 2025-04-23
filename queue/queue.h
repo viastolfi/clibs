@@ -58,7 +58,7 @@ EXAMPLE:
         if(!queue_add(queue, baz))
             return 1;
 
-        char* c = malloc(4);
+        char* c;
         if((c = queue_dequeue(queue)) == NULL)
             return 1;
 
@@ -66,8 +66,6 @@ EXAMPLE:
 
         if(!queue_free(queue))
             return 1;
-
-        free(c);
             
         return 0;
     }
