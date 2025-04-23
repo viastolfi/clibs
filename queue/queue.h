@@ -183,7 +183,7 @@ QUEUE_LIB int queue_free(queue_t* q)
         return 0;
 
     queue_element* l = q->head;
-    for(int i = 0; i < q->size; ++i)
+    while(l != NULL)
     {
         queue_element* n = l->prev;
         QUEUE_FREE(l);
