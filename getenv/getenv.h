@@ -12,6 +12,7 @@ API:
     int getenv_load_env(char* path);
     char* getenv_get_env(char* key);
     char* getenv_strerror();
+    void getenv_free();
 
 MACROS:
     
@@ -22,7 +23,7 @@ MACROS:
 
     macros also exist to improve interface
 
-    GETENV_OK -> return 1 if last error is GETENV_ERR_NONE, 0 otherwise
+    GETENV_OK -> 1 if last error is GETENV_ERR_NONE, 0 otherwise
 
 RETURNS:
 
@@ -151,6 +152,7 @@ GETENV_LIB char* getenv_consume(int i);
 
 GETENV_LIB int getenv_load_env(char* path);
 GETENV_LIB char* getenv_get_env(char* key);
+GETENV_LIB void getenv_free();
 
 GETENV_LIB char* getenv_strerror();
 
@@ -306,6 +308,19 @@ GETENV_LIB char* getenv_strerror()
     case GETENV_ERR_FILE_NOT_FOUND: return "Env file not found";
     case GETENV_ERR_MEMORY: return "Memory related error";
   }
+}
+
+GETENV_LIB void getenv_free()
+{
+  for (int i = 0; i < env.vars_count; ++i) {
+    GETENV_FREE(env.vars[i].key);
+    GETENV_FREE(env.vars[i].value);
+  }
+  
+  GETENV_FREE(env.vars);
+  GETENV_FREE(env.getenv_content);
+
+  env = (getenv_t){0};
 }
 
 #endif // GETENV_LIB_IMPLEMENTATION

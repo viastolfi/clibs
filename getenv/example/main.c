@@ -23,5 +23,7 @@ int main(void)
   printf("EXPECT: BAR, GET : %s\n", c);
   printf("EXPECT: QUX, GET : %s\n", d);
 
+  getenv_free();
+
   return 0;
 }
