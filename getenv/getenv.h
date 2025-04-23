@@ -234,6 +234,28 @@ GETENV_LIB int load_env(char* path)
             continue;
         }
 
+        if(c.value == '#')
+        {
+          dump = _getenv_consume();
+          GETENV_FREE(dump);
+          dump = NULL;
+
+          int comment_length = 0;
+          while((c = _getenv_peek(comment_length)).has_value)
+          {
+            if(c.value == '\n')
+              break;
+            
+            ++comment_length;
+          }
+
+          dump = _getenv_consume(comment_length);
+          GETENV_FREE(dump);
+          dump = NULL;
+
+          continue;
+        }
+
         env.vars_count++;
         env.vars = (getenv_var_t*) GETENV_REALLOC(env.vars, env.vars_count * sizeof(getenv_var_t));
         if(env.vars == NULL)
