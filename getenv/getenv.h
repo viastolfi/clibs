@@ -39,6 +39,7 @@ ERRORS:
   
   GETENV_ERR_NONE          
   GETENV_ERR_KEY_NOT_FOUND
+  GETENV_ERR_FILE_NOT_FOUND
 
 EXAMPLE:
 
@@ -101,7 +102,8 @@ extern "C" {
 typedef enum
 {
   GETENV_ERR_NONE = 0,
-  GETENV_ERR_KEY_NOT_FOUND
+  GETENV_ERR_KEY_NOT_FOUND,
+  GETENV_ERR_FILE_NOT_FOUND
 } getenv_err_t;
 
 typedef struct
@@ -189,7 +191,10 @@ GETENV_LIB int load_env(char* path)
 
   f = fopen(path, "rb");
   if(f == NULL)
-      return 0;
+  {
+    getenv_last_error = GETENV_ERR_FILE_NOT_FOUND;
+    return 0;
+  }
 
   fseek(f, 0, SEEK_END);
   length = ftell(f);
@@ -276,6 +281,7 @@ GETENV_LIB char* getenv_strerror()
   {
     case GETENV_ERR_NONE: return "No error";
     case GETENV_ERR_KEY_NOT_FOUND: return "Key not found";
+    case GETENV_ERR_FILE_NOT_FOUND: return "Env file not found";
   }
 }
 
