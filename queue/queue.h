@@ -135,6 +135,9 @@ QUEUE_LIB void* queue_dequeue(queue_t* q);
 QUEUE_LIB queue_t* queue_init()
 {
     queue_t* q = (queue_t*) QUEUE_MALLOC(sizeof(queue_t));
+    if(q == NULL)
+        return NULL;
+    
     q->size = 0;
     q->head = NULL;
     q->tail = NULL;
