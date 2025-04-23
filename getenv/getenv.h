@@ -20,8 +20,13 @@ extern "C" {
 #endif // GETENV_REALLOC
 
 #include <stdio.h>
-#include <errno.h>
 #include <string.h>
+
+typedef enum
+{
+  GETENV_ERR_NONE = 0,
+  GETENV_ERR_KEY_NOT_FOUND
+} getenv_err_t;
 
 typedef struct
 {
@@ -63,7 +68,13 @@ GETENV_LIB char* getenv_consume(int i);
 GETENV_LIB int getenv_load_env(char* path);
 GETENV_LIB char* getenv_get_env(char* key);
 
+GETENV_LIB char* getenv_strerror();
+
 #ifdef GETENV_LIB_IMPLEMENTATION
+
+#define GETENV_OK (getenv_last_error == GETENV_ERR_NONE)
+
+static getenv_err_t getenv_last_error = GETENV_ERR_NONE;
 
 getenv_t env = {.vars = NULL, .getenv_content = NULL, .getenv_buffer = NULL, .vars_count = 0, .getenv_index = 0};
 
@@ -78,9 +89,12 @@ GETENV_LIB getenv_optionnal_char_t getenv_peek(int i)
 GETENV_LIB char* getenv_consume(int i)
 {
   if(i == 0)
-      return "ERROR"; // to handle properly
+    return NULL;
 
   char* s = (char*) GETENV_MALLOC(i + 1);
+  if(s == NULL)
+    return NULL;
+
   for(int j = 0; j < i; ++j)
   {
       s[j] = env.getenv_content[env.getenv_index];
@@ -99,10 +113,7 @@ GETENV_LIB int load_env(char* path)
 
   f = fopen(path, "rb");
   if(f == NULL)
-  {
-      perror("Error reading .env file");
-      return 1;
-  }
+      return 0;
 
   fseek(f, 0, SEEK_END);
   length = ftell(f);
@@ -116,7 +127,7 @@ GETENV_LIB int load_env(char* path)
   else
   {
       fclose(f);
-      return 1;
+      return 0;
   }
 
   fclose(f);
@@ -167,6 +178,8 @@ GETENV_LIB int load_env(char* path)
         strcpy(env.vars[env.vars_count - 1].value, _getenv_consume(value_length));
     }
   }
+
+  return 1;
 }
 
 GETENV_LIB char* getenv_get_env(char* key)
@@ -177,8 +190,17 @@ GETENV_LIB char* getenv_get_env(char* key)
           return env.vars[i].value;
   }
 
-  perror("env key not found");
-  exit(errno);
+  getenv_last_error = GETENV_ERR_KEY_NOT_FOUND;
+  return NULL;
+}
+
+GETENV_LIB char* getenv_strerror()
+{
+  switch(getenv_last_error)
+  {
+    case GETENV_ERR_NONE: return "No error";
+    case GETENV_ERR_KEY_NOT_FOUND: return "Key not found";
+  }
 }
 
 #endif // GETENV_LIB_IMPLEMENTATION

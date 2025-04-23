@@ -5,9 +5,20 @@
 
 int main(void)
 {
-  load_env("./.env");
+  if(!load_env("./.env") || !GETENV_OK)
+  {
+    fprintf(stderr, "Load failed : %s\n", getenv_strerror());
+    return 1;
+  }
+
   char *c = get_env("FOO");
   char *d = get_env("BAZ");
+
+  if(c == NULL || d == NULL)
+  {
+    fprintf(stderr, "Missing key: %s\n", getenv_strerror());
+    return 1;
+  }
   
   printf("EXPECT: BAR, GET : %s\n", c);
   printf("EXPECT: QUX, GET : %s\n", d);
