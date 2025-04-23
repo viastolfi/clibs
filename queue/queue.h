@@ -119,7 +119,7 @@ QUEUE_LIB int queue_free(queue_t* q)
     q->head = NULL;
     q->tail = NULL;
     QUEUE_MUTEX_DESTROY(q->mutex);
-    free(q);
+    QUEUE_FREE(q);
     return 1;
 }
 
