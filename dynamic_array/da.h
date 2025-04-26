@@ -1,4 +1,4 @@
-i/*
+/*
 ------------------------------------------------------------------------------
 DYNAMIC ARRAY LIB FOR C - ASTOLFI Vincent 2025
 
@@ -18,7 +18,7 @@ typedef struct {
 ------------------------------------------------------------------------------
 */
 #ifndef DA_H
-#define DA_h
+#define DA_H
 
 #ifndef DA_REALLOC
 #include    <stdlib.h>
@@ -27,12 +27,12 @@ typedef struct {
 
 #ifndef DA_FREE
 #include    <stdlib.h>
-#define     DA_FREE free;
+#define     DA_FREE free
 #endif // DA_FREE
 
 #ifndef DA_ASSERT
 #include    <assert.h>
-#define     DA_ASSERT assert;
+#define     DA_ASSERT assert
 #endif // DA_ASSSERT
 
 #ifdef __cplusplus
@@ -63,7 +63,7 @@ extern "C" {
             (da)->items = DA_REALLOC((da)->items, (da)->capacity * sizeof(*(da)->items));   \
             DA_ASSERT((da)->items != NULL && "realloc failed");                             \
         }                                                                                   \
-        (da)->items[(da)->count++] = item                                                   \
+        (da)->items[(da)->count++] = item;                                                  \
     } while(0)
 
 #define da_free(da) DA_FREE((da)->items)
