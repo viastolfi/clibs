@@ -245,6 +245,8 @@ QUEUE_LIB void* queue_dequeue(queue_t* q)
     if(q->head == NULL)
         q->tail = NULL;
 
+    q->size--;
+
     QUEUE_FREE(el);
     QUEUE_MUTEX_UNLOCK(q->mutex);
 
