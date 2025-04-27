@@ -7,13 +7,65 @@ DYNAMIC ARRAY LIB FOR C - ASTOLFI Vincent 2025
 
 Usage:
 
-define your dynamic array like so :
+// define your dynamic array like so :
 
 typedef struct {
     Type* items;
     size_t count; 
     size_t capacity;
 } my_dynamic_array;
+
+// This mean that this lib can work with any type of stored items
+// Your struct just has to follow the three same variables
+
+// then include the lib
+#define DA_LIB_IMPLEMENTATION
+#include <da.h>
+
+API:
+
+    da_append(*da, *Item);
+    da_free(*da);
+    da_foreach(Type, Iterator, *da);
+    da_remove(*da, Place);
+
+ERRORS: 
+    
+    Those functions does not returns anything
+    If an error occurs, it will at memory management so the app will close
+    An error message will be printed for debugging
+
+EXAMPLE: 
+
+    ```c
+    #define DA_LIB_IMPLEMENTATION
+    #include "../da.h"
+
+    #include <stdio.h>
+
+    typedef struct
+    {
+        int* items;
+        size_t count;
+        size_t capacity;
+    } Numbers;
+
+    int main(void) 
+    {
+        Numbers numbers = {0};    
+
+        da_append(&numbers, 1);
+        da_append(&numbers, 2);
+        da_append(&numbers, 3);
+
+        da_foreach(int, it, &numbers) {
+            size_t index = it - numbers.items;
+            printf("%zu: %d\n", index, *it); 
+        }
+
+        da_free(&numbers);
+    }    
+    ```
 
 ------------------------------------------------------------------------------
 */
