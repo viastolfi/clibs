@@ -22,4 +22,6 @@ int main(void)
         size_t index = it - numbers.items;
         printf("%zu: %d\n", index, *it); 
     }
+
+    da_free(&numbers);
 }
