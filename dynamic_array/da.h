@@ -118,6 +118,15 @@ extern "C" {
         (da)->items[(da)->count++] = item;                                                  \
     } while(0)
 
+
+#define da_append_amount(da, item, amount)    \
+    do {                                      \
+        for(int i = 0; i < amount; ++i) {     \
+            da_append(da, item);              \
+        }                                     \
+    }while(0)
+
+
 #define da_free(da) DA_FREE((da)->items)
 
 #define da_foreach(Type, it, da) for(Type* it = (da)->items; it < (da)->items + (da)->count; ++it)
