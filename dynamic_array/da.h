@@ -24,9 +24,10 @@ typedef struct {
 
 API:
 
-    da_append(*da, *Item);
+    da_append(*da, Item);
     da_free(*da);
     da_foreach(Type, Iterator, *da);
+    da_append_amout(*da, Item, amount) -> append the same item 'amount' times
     da_remove(*da, Place);
 
 ERRORS: 
@@ -66,6 +67,8 @@ EXAMPLE:
         da_free(&numbers);
     }    
     ```
+
+    see (https://github.com/viastolfi/clibs/tree/main/dynamic_array/example) for more example
 
 ------------------------------------------------------------------------------
 */
