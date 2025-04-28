@@ -124,7 +124,7 @@ extern "C" {
 
 #define da_append_amount(da, item, amount)    \
     do {                                      \
-        for(size_t i = 0; i < (size_t) amount; ++i) {     \
+        for(size_t i = 0; i < amount; ++i) {     \
             da_append(da, item);              \
         }                                     \
     }while(0)
