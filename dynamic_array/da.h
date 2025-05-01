@@ -105,8 +105,6 @@ extern "C" {
 #define     DA_INIT_CAP 256
 #endif
 
-#endif // DA_LIB_IMPLEMENTATION
-
 #define da_append(da, item)                                                                 \
     do {                                                                                    \
         if((da)->count + 1 > (da)->capacity) {                                              \
@@ -140,6 +138,8 @@ extern "C" {
         DA_ASSERT(j < (da)->count && "remove : index out of bound");    \
         (da)->items[j] = (da)->items[--(da)->count];                    \
     } while(0)
+
+#endif // DA_LIB_IMPLEMENTATION
 
 #ifdef __cplusplus
 }
