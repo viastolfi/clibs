@@ -128,7 +128,13 @@ extern "C" {
     }while(0)
 
 
-#define da_free(da) DA_FREE((da)->items)
+#define da_free(da)                \
+    do {                           \
+        DA_FREE((da)->items);      \
+        (da)->items = NULL;        \
+        (da)->count = 0;           \
+        (da)->capacity = 0;        \
+} while(0)
 
 #define da_foreach(Type, it, da) for(Type* it = (da)->items; it < (da)->items + (da)->count; ++it)
 
