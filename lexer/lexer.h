@@ -32,6 +32,70 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 #endif // LEXER_LIB_IMPLEMENTATION
 #endif // LEXER_LIB_DEFINITION
 
+typedef struct 
+{
+  const char* input_stream;
+  const char* eof;
 
+  // actual point where we are at in the parsing
+  const char* parse_point;
 
+  // Token variables
+  long token;
+  long int_number;
+} lexer;
+
+// We start at 256 since this is the end of the ASCII table
+enum 
+{
+  LEXER_eof = 256,
+  LEXER_intlit,
+};
+
+// So we can #if on each token definition
+#define Y(x) 1
+#define N(x) 0
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+extern int lexer_get_token(lexer* l);
+extern void lexer_init_lexer(lexer* l, const char* input_stream, const char* end_input_stream);
+
+#ifdef __cplusplus
+  }
+#endif // __cplusplus
+
+#ifdef LEXER_LIB_IMPLEMENTATION
+
+#ifndef LEXER_STDLIB
+#define LEXER_STDLIB
+#include <stdlib.h>
+#endif // LEXER_STDLIB
+
+static int lexer_is_white(char c) 
+{
+  return c == ' ' || c == '\n' || c == '\t' || c == '\r' || c == '\f'; 
+}
+
+void lexer_init_lexer(lexer* l, const char* input_stream, const char* end_input_stream) 
+{
+  l->input_stream = input_stream;
+  l->eof = end_input_stream;
+  l->parse_point = input_stream;
+}
+
+int lexer_get_token(lexer* l) 
+{
+  const char* p = l->parse_point;
+
+  for (;;) {
+    while (p != l->eof && lexer_is_white(*p)) {
+      ++p;
+    }
+  }
+}
+
+#endif // LEXER_LIB_IMPLEMENTATION
 #endif // LEXER_H
