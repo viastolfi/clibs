@@ -48,9 +48,13 @@ typedef struct
 // We start at 256 since this is the end of the ASCII table
 enum 
 {
-  LEXER_eof = 256,
-  LEXER_intlit,
+  LEXER_token_eof = 256,
+  LEXER_token_intlit,
 };
+
+#if LEXER_LIB_DECIMAL_INTS(x)
+#define LEXER_decimal_ints
+#endif // LEXER_LIB_DECIMAL_INTS
 
 // So we can #if on each token definition
 #define Y(x) 1
@@ -79,6 +83,22 @@ static int lexer_is_white(char c)
   return c == ' ' || c == '\n' || c == '\t' || c == '\r' || c == '\f'; 
 }
 
+static int lexer_eof(lexer_t* l)
+{
+  l->token = LEXER_token_eof;
+  return 0;
+}
+
+// Helper function for creating a token and updating the lexer
+static int lexer_create_token(lexer_t* l, int token, const char* end)
+{
+  l->token = token;
+
+  // the new parse point is one char after the token we just created
+  l->parse_point = end + 1;
+  return 1;
+}
+
 void lexer_init_lexer(lexer_t* l, const char* input_stream, const char* end_input_stream) 
 {
   l->input_stream = input_stream;
@@ -94,6 +114,21 @@ int lexer_get_token(lexer_t* l)
     while (p != l->eof && lexer_is_white(*p)) {
       ++p;
     }
+  }
+
+  if (p == l->eof)
+    return lexer_eof(l);
+
+  switch (*p) {
+    default:
+      // not implemented
+      return 1;
+    case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+    #ifdef LEXER_decimal_ints
+    {
+      // TODO: implement this 
+    }
+    #endif // LEXER_decimal_ints
   }
 }
 
