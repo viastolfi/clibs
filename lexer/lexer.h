@@ -43,7 +43,7 @@ typedef struct
   // Token variables
   long token;
   long int_number;
-} lexer;
+} lexer_t;
 
 // We start at 256 since this is the end of the ASCII table
 enum 
@@ -60,8 +60,8 @@ enum
 extern "C" {
 #endif // __cplusplus
 
-extern int lexer_get_token(lexer* l);
-extern void lexer_init_lexer(lexer* l, const char* input_stream, const char* end_input_stream);
+extern int lexer_get_token(lexer_t* l);
+extern void lexer_init_lexer(lexer_t* l, const char* input_stream, const char* end_input_stream);
 
 #ifdef __cplusplus
   }
@@ -79,14 +79,14 @@ static int lexer_is_white(char c)
   return c == ' ' || c == '\n' || c == '\t' || c == '\r' || c == '\f'; 
 }
 
-void lexer_init_lexer(lexer* l, const char* input_stream, const char* end_input_stream) 
+void lexer_init_lexer(lexer_t* l, const char* input_stream, const char* end_input_stream) 
 {
   l->input_stream = input_stream;
   l->eof = end_input_stream;
   l->parse_point = input_stream;
 }
 
-int lexer_get_token(lexer* l) 
+int lexer_get_token(lexer_t* l) 
 {
   const char* p = l->parse_point;
 
