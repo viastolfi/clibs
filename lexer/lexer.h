@@ -25,15 +25,15 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 // BASIC INT IN DECIMAL FORM (ex: 12)
 #define LEXER_LIB_DECIMAL_INTS  Y  // "0|[1-9][0-9]*"   LEXER_token_intlit
 #define LEXER_LIB_INCREMENTS    Y  // "++"              LEXER_token_plusplus
-#define LEXER_LIB_PLUSEQ        Y  // "+="              LEXER_token_pluseq
-#define LEXER_LIB_DECREMENT     Y  // "--"              LEXER_token_minusminus
+                                   // "--"              LEXER_token_minusminus
+#define LEXER_LIB_ARITH         Y  // "+="              LEXER_token_pluseq
+                                   // "-="              LEXER_token_minusminus
 #define LEXER_LIB_SIMPLE_ARROW  Y  // "->"              LEXER_token_sarrow
-#define LEXER_LIB_MINUSEQ       Y  // "-="              LEXER_token_minuseq
 #define LEXER_LIB_COMPARISON    Y  // "=="              LEXER_token_eqeq
+                                   // ">="              LEXER_token_gteq
+                                   // "<="              LEXER_token_lseq
 #define LEXER_LIB_JS_COMPARISON Y  // "==="             LEXER_token_eqeqeq
 #define LEXER_LIB_DOUBLE_ARROW  Y  // "=>"              LEXER_token_darrow
-#define LEXER_LIB_GREATER_EQUAL Y  // ">="              LEXER_token_gteq
-#define LEXER_LIB_LESSER_EQUAL  Y  // "<="              LEXER_token_lseq
 
 // TODO: add all other possible token
 
@@ -164,13 +164,13 @@ int lexer_get_token(lexer_t* l)
     case '+':
       if (p+1 != l->eof) {
         LEXER_LIB_INCREMENTS(if (p[1] == '+') return lexer_create_token(l, LEXER_token_plusplus, p+1);)
-        LEXER_LIB_PLUSEQ(if (p[1] == '=') return lexer_create_token(l, LEXER_token_pluseq, p+1);)
+        LEXER_LIB_ARITH(if (p[1] == '=') return lexer_create_token(l, LEXER_token_pluseq, p+1);)
       }
       goto single_char;
     case '-':
       if (p + 1 != l->eof) {
-        LEXER_LIB_DECREMENT( if (p[1] == '-') return lexer_create_token(l, LEXER_token_minusminus, p+1);)
-        LEXER_LIB_MINUSEQ( if (p[1] == '=') return lexer_create_token(l, LEXER_token_minuseq, p+1);)
+        LEXER_LIB_INCREMENTS( if (p[1] == '-') return lexer_create_token(l, LEXER_token_minusminus, p+1);)
+        LEXER_LIB_ARITH( if (p[1] == '=') return lexer_create_token(l, LEXER_token_minuseq, p+1);)
         LEXER_LIB_SIMPLE_ARROW( if (p[1] == '>') return lexer_create_token(l, LEXER_token_sarrow, p+1);)
       }
       goto single_char;
@@ -188,10 +188,10 @@ int lexer_get_token(lexer_t* l)
       }
       goto single_char;
     case '<':
-        LEXER_LIB_LESSER_EQUAL( if (p+1 != l->eof && p[1] == '=') return lexer_create_token(l, LEXER_token_lseq, p+1);)
+        LEXER_LIB_COMPARISON( if (p+1 != l->eof && p[1] == '=') return lexer_create_token(l, LEXER_token_lseq, p+1);)
       goto single_char;
     case '>':
-        LEXER_LIB_GREATER_EQUAL( if (p+1 != l->eof && p[1] == '=') return lexer_create_token(l, LEXER_token_gteq, p+1);)
+        LEXER_LIB_COMPARISON( if (p+1 != l->eof && p[1] == '=') return lexer_create_token(l, LEXER_token_gteq, p+1);)
       goto single_char;
     case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
     #ifdef LEXER_decimal_ints
