@@ -23,12 +23,14 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 #endif
 
 // BASIC INT IN DECIMAL FORM (ex: 12)
-#define LEXER_LIB_DECIMAL_INTS Y // "0|[1-9][0-9]*"   LEXER_token_intlit
-#define LEXER_LIB_INCREMENTS   Y // "++"              LEXER_token_plusplus
-#define LEXER_LIB_PLUSEQ       Y // "+="              LEXER_token_pluseq
-#define LEXER_LIB_DECREMENT    Y // "--"              LEXER_token_minusminus
-#define LEXER_LIB_SIMPLE_ARROW Y // "->"              LEXER_token_sarrow
-#define LEXER_LIB_MINUSEQ      Y // "-="              LEXER_token_minuseq
+#define LEXER_LIB_DECIMAL_INTS  Y  // "0|[1-9][0-9]*"   LEXER_token_intlit
+#define LEXER_LIB_INCREMENTS    Y  // "++"              LEXER_token_plusplus
+#define LEXER_LIB_PLUSEQ        Y  // "+="              LEXER_token_pluseq
+#define LEXER_LIB_DECREMENT     Y  // "--"              LEXER_token_minusminus
+#define LEXER_LIB_SIMPLE_ARROW  Y  // "->"              LEXER_token_sarrow
+#define LEXER_LIB_MINUSEQ       Y  // "-="              LEXER_token_minuseq
+#define LEXER_LIB_COMPARISON    Y  // "=="              LEXER_token_eqeq
+#define LEXER_LIB_JS_COMPARISON Y  // "==="             LEXER_token_eqeqeq
 
 // TODO: add all other possible token
 
@@ -61,7 +63,10 @@ enum
   LEXER_token_minus,
   LEXER_token_minusminus,
   LEXER_token_sarrow, 
-  LEXER_token_minuseq
+  LEXER_token_minuseq,
+  LEXER_token_eq,
+  LEXER_token_eqeq,
+  LEXER_token_eqeqeq
 };
 
 
@@ -161,6 +166,16 @@ int lexer_get_token(lexer_t* l)
         LEXER_LIB_SIMPLE_ARROW( if (p[1] == '>') return lexer_create_token(l, LEXER_token_sarrow, p+1);)
       }
       goto single_char;
+    case '=':
+      if (p + 1 != l->eof) {
+        if (p[1] == '=') {
+          if (p + 2 != l->eof) {
+            LEXER_LIB_JS_COMPARISON( if (p[2] == '=') return lexer_create_token(l, LEXER_token_eqeqeq, p+2);)
+          }
+          LEXER_LIB_COMPARISON(return lexer_create_token(l, LEXER_token_eqeq, p+1);)
+        }
+      }
+      goto single_char;
     case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
     #ifdef LEXER_decimal_ints
     {
@@ -198,6 +213,9 @@ static void lexer_print_token(lexer_t *l)
     case LEXER_token_minusminus: printf("--"); break;
     case LEXER_token_minuseq : printf("-="); break;
     case LEXER_token_sarrow: printf("->"); break;
+    case LEXER_token_eq: printf("="); break;
+    case LEXER_token_eqeq: printf("=="); break;
+    case LEXER_token_eqeqeq: printf("==="); break;
     default:
       if (l->token >= 0 && l->token < 256)
         printf("%c", (int) l->token);
