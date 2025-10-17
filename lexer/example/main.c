@@ -5,7 +5,7 @@
 
 int main(void) 
 {
-  const char* text = "13 1 13 42";  
+  const char* text = "13 1 13 42 + += ++ +++";  
   int len = strlen(text);
 
   lexer_t lexer;
@@ -13,7 +13,7 @@ int main(void)
   lexer_init_lexer(&lexer, text, text + len);
   while (lexer_get_token(&lexer)) {
     lexer_print_token(&lexer);
-    printf("\n");
+    printf("   ");
   }
 
   return 0;

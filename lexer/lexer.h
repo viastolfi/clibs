@@ -23,7 +23,9 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 #endif
 
 // BASIC INT IN DECIMAL FORM (ex: 12)
-#define LEXER_LIB_DECIMAL_INTS Y // "0|[1-9][0-9]*"   LEX_intlit
+#define LEXER_LIB_DECIMAL_INTS Y // "0|[1-9][0-9]*"   LEXER_token_intlit
+#define LEXER_LIB_INCREMENTS   Y // "++"              LEXER_token_plusplus
+#define LEXER_LIB_PLUSEQ       Y // "+="              LEXER_token_pluseq
 
 // TODO: add all other possible token
 
@@ -50,6 +52,9 @@ enum
 {
   LEXER_token_eof = 256,
   LEXER_token_intlit,
+  LEXER_token_plus,
+  LEXER_token_plusplus,
+  LEXER_token_pluseq
 };
 
 
@@ -79,6 +84,14 @@ extern void lexer_init_lexer(lexer_t* l, const char* input_stream, const char* e
 #include <stdlib.h>
 #endif // LEXER_STDLIB
 
+// Disable the 'config' usage of Y and N
+// Now, Y expand to its content and N to nothing
+// This avoid compiler error
+#undef Y
+#define Y(a) a
+#undef N
+#define N(a)
+
 static int lexer_is_white(char c) 
 {
   return c == ' ' || c == '\n' || c == '\t' || c == '\r' || c == '\f'; 
@@ -95,7 +108,6 @@ static int lexer_create_token(lexer_t* l, int token, const char* end)
 {
   l->token = token;
 
-  // the new parse point is one char after the token we just created
   l->parse_point = end + 1;
   return 1;
 }
@@ -125,6 +137,16 @@ int lexer_get_token(lexer_t* l)
     default:
       // not implemented
       return 0;
+      
+    single_char:
+      return lexer_create_token(l, *p, p);
+
+    case '+':
+      if (p+1 != l->eof) {
+        LEXER_LIB_INCREMENTS(if (p[1] == '+') return lexer_create_token(l, LEXER_token_plusplus, p+1);)
+        LEXER_LIB_PLUSEQ(if (p[1] == '=') return lexer_create_token(l, LEXER_token_pluseq, p+1);)
+      }
+      goto single_char;
     case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
     #ifdef LEXER_decimal_ints
     {
@@ -155,6 +177,9 @@ static void lexer_print_token(lexer_t *l)
   {
     case LEXER_token_eof: printf("EOF"); break;
     case LEXER_token_intlit: printf("#%ld", l->int_number); break;
+    case LEXER_token_plus: printf("+"); break;
+    case LEXER_token_plusplus: printf("++"); break;
+    case LEXER_token_pluseq: printf("+="); break;
     default:
       if (l->token >= 0 && l->token < 256)
         printf("%c", (int) l->token);
