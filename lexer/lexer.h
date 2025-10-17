@@ -31,6 +31,7 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 #define LEXER_LIB_MINUSEQ       Y  // "-="              LEXER_token_minuseq
 #define LEXER_LIB_COMPARISON    Y  // "=="              LEXER_token_eqeq
 #define LEXER_LIB_JS_COMPARISON Y  // "==="             LEXER_token_eqeqeq
+#define LEXER_LIB_DOUBLE_ARROW  Y  // "=>"              LEXER_token_darrow
 
 // TODO: add all other possible token
 
@@ -66,7 +67,8 @@ enum
   LEXER_token_minuseq,
   LEXER_token_eq,
   LEXER_token_eqeq,
-  LEXER_token_eqeqeq
+  LEXER_token_eqeqeq,
+  LEXER_token_darrow
 };
 
 
@@ -174,6 +176,9 @@ int lexer_get_token(lexer_t* l)
           }
           LEXER_LIB_COMPARISON(return lexer_create_token(l, LEXER_token_eqeq, p+1);)
         }
+        if (p[1] == '>') {
+          LEXER_LIB_DOUBLE_ARROW(return lexer_create_token(l, LEXER_token_darrow, p+1);) 
+        }
       }
       goto single_char;
     case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
@@ -216,6 +221,7 @@ static void lexer_print_token(lexer_t *l)
     case LEXER_token_eq: printf("="); break;
     case LEXER_token_eqeq: printf("=="); break;
     case LEXER_token_eqeqeq: printf("==="); break;
+    case LEXER_token_darrow: printf("=>"); break;
     default:
       if (l->token >= 0 && l->token < 256)
         printf("%c", (int) l->token);
