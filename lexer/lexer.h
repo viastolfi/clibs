@@ -188,14 +188,10 @@ int lexer_get_token(lexer_t* l)
       }
       goto single_char;
     case '<':
-      if (p + 1 != l->eof) {
-        LEXER_LIB_LESSER_EQUAL( if (p[1] == '=') return lexer_create_token(l, LEXER_token_lseq, p+1);)
-      }
+        LEXER_LIB_LESSER_EQUAL( if (p+1 != l->eof && p[1] == '=') return lexer_create_token(l, LEXER_token_lseq, p+1);)
       goto single_char;
     case '>':
-      if (p + 1 != l->eof) {
-        LEXER_LIB_GREATER_EQUAL( if (p[1] == '=') return lexer_create_token(l, LEXER_token_gteq, p+1);)
-      }
+        LEXER_LIB_GREATER_EQUAL( if (p+1 != l->eof && p[1] == '=') return lexer_create_token(l, LEXER_token_gteq, p+1);)
       goto single_char;
     case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
     #ifdef LEXER_decimal_ints
