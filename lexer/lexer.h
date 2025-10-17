@@ -52,13 +52,14 @@ enum
   LEXER_token_intlit,
 };
 
-#if LEXER_LIB_DECIMAL_INTS(x)
-#define LEXER_decimal_ints
-#endif // LEXER_LIB_DECIMAL_INTS
 
 // So we can #if on each token definition
 #define Y(x) 1
 #define N(x) 0
+
+#if LEXER_LIB_DECIMAL_INTS(x)
+#define LEXER_decimal_ints
+#endif // LEXER_LIB_DECIMAL_INTS
 
 #ifdef __cplusplus
 extern "C" {
@@ -114,6 +115,7 @@ int lexer_get_token(lexer_t* l)
     while (p != l->eof && lexer_is_white(*p)) {
       ++p;
     }
+    break;
   }
 
   if (p == l->eof)
@@ -122,13 +124,44 @@ int lexer_get_token(lexer_t* l)
   switch (*p) {
     default:
       // not implemented
-      return 1;
+      return 0;
     case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
     #ifdef LEXER_decimal_ints
     {
-      // TODO: implement this 
+      const char* q = p;
+      #ifdef LEXER_STDLIB
+      /* strtol -> string to long converter
+       * params: 
+       * * ptr of the string we want to convert
+       * * ptr that will indicate the end of the long (ie: '12345Toto q -> 'T')
+       * * type of the number (ie: 10 decimal number)
+       * return the converted long value
+       */
+      l->int_number = strtol((const char *) p, (char **) &q, 10);  
+      #else
+      // TODO: implement case of no stdlib
+      return 0;
+      #endif // LEXER_STDLIB
+      lexer_create_token(l, LEXER_token_intlit, q);
     }
+    // TODO: add some suffixe parsing (ie: 42U)
     #endif // LEXER_decimal_ints
+  }
+}
+
+static void lexer_print_token(lexer_t *l) 
+{
+  switch (l->token)
+  {
+    case LEXER_token_eof: printf("EOF"); break;
+    case LEXER_token_intlit: printf("#%ld", l->int_number); break;
+    default:
+      if (l->token >= 0 && l->token < 256)
+        printf("%c", (int) l->token);
+      else {
+        printf("<<<UNKNOWN TOKEN %ld >>>\n", l->token);
+      }
+      break;
   }
 }
 
