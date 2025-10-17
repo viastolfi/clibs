@@ -29,10 +29,10 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 #define LEXER_LIB_ARITH         Y  // "+="              LEXER_token_pluseq
                                    // "-="              LEXER_token_minusminus
 #define LEXER_LIB_SIMPLE_ARROW  Y  // "->"              LEXER_token_sarrow
-#define LEXER_LIB_COMPARISON    Y  // "=="              LEXER_token_eqeq
+#define LEXER_LIB_COMPARISON    Y  // "=="              LEXER_token_eq
                                    // ">="              LEXER_token_gteq
                                    // "<="              LEXER_token_lseq
-#define LEXER_LIB_JS_COMPARISON Y  // "==="             LEXER_token_eqeqeq
+#define LEXER_LIB_JS_COMPARISON Y  // "==="             LEXER_token_js_eq
 #define LEXER_LIB_DOUBLE_ARROW  Y  // "=>"              LEXER_token_darrow
 
 // TODO: add all other possible token
@@ -56,24 +56,21 @@ typedef struct
 } lexer_t;
 
 // We start at 256 since this is the end of the ASCII table
+// Doing this, we can store single char only using their ASCII value
+// Hence reducing the amount of needed token in this enum
 enum 
 {
   LEXER_token_eof = 256,
   LEXER_token_intlit,
-  LEXER_token_plus,
   LEXER_token_plusplus,
   LEXER_token_pluseq,
-  LEXER_token_minus,
   LEXER_token_minusminus,
   LEXER_token_sarrow, 
   LEXER_token_minuseq,
   LEXER_token_eq,
-  LEXER_token_eqeq,
-  LEXER_token_eqeqeq,
+  LEXER_token_js_eq,
   LEXER_token_darrow,
-  LEXER_token_gt,
   LEXER_token_gteq,
-  LEXER_token_ls,
   LEXER_token_lseq
 };
 
@@ -178,9 +175,9 @@ int lexer_get_token(lexer_t* l)
       if (p + 1 != l->eof) {
         if (p[1] == '=') {
           if (p + 2 != l->eof) {
-            LEXER_LIB_JS_COMPARISON( if (p[2] == '=') return lexer_create_token(l, LEXER_token_eqeqeq, p+2);)
+            LEXER_LIB_JS_COMPARISON( if (p[2] == '=') return lexer_create_token(l, LEXER_token_js_eq, p+2);)
           }
-          LEXER_LIB_COMPARISON(return lexer_create_token(l, LEXER_token_eqeq, p+1);)
+          LEXER_LIB_COMPARISON(return lexer_create_token(l, LEXER_token_eq, p+1);)
         }
         if (p[1] == '>') {
           LEXER_LIB_DOUBLE_ARROW(return lexer_create_token(l, LEXER_token_darrow, p+1);) 
@@ -223,20 +220,15 @@ static void lexer_print_token(lexer_t *l)
   {
     case LEXER_token_eof: printf("EOF"); break;
     case LEXER_token_intlit: printf("#%ld", l->int_number); break;
-    case LEXER_token_plus: printf("+"); break;
     case LEXER_token_plusplus: printf("++"); break;
     case LEXER_token_pluseq: printf("+="); break;
-    case LEXER_token_minus: printf("-"); break;
     case LEXER_token_minusminus: printf("--"); break;
     case LEXER_token_minuseq : printf("-="); break;
     case LEXER_token_sarrow: printf("->"); break;
-    case LEXER_token_eq: printf("="); break;
-    case LEXER_token_eqeq: printf("=="); break;
-    case LEXER_token_eqeqeq: printf("==="); break;
+    case LEXER_token_eq: printf("=="); break;
+    case LEXER_token_js_eq: printf("==="); break;
     case LEXER_token_darrow: printf("=>"); break;
-    case LEXER_token_gt: printf(">"); break;
     case LEXER_token_gteq: printf(">="); break;
-    case LEXER_token_ls: printf("<"); break;
     case LEXER_token_lseq: printf("<="); break;
     default:
       if (l->token >= 0 && l->token < 256)

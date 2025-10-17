@@ -15,6 +15,9 @@ int main(void)
     lexer_print_token(&lexer);
     printf("   ");
   } 
+  
+  // explicitely print the 'EOF' token for better debugging
+  lexer_print_token(&lexer);
 
   return 0;
 }
