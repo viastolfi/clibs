@@ -28,6 +28,7 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
                                    // "--"              LEXER_token_minusminus
 #define LEXER_LIB_ARITH         Y  // "+="              LEXER_token_pluseq
                                    // "-="              LEXER_token_minusminus
+                                   // "*="              LEXER_token_muleq
 #define LEXER_LIB_SIMPLE_ARROW  Y  // "->"              LEXER_token_sarrow
 #define LEXER_LIB_COMPARISON    Y  // "=="              LEXER_token_eq
                                    // ">="              LEXER_token_gteq
@@ -75,7 +76,8 @@ enum
   LEXER_token_gteq,
   LEXER_token_lseq,
   LEXER_token_neq,
-  LEXER_token_js_neq
+  LEXER_token_js_neq,
+  LEXER_token_muleq
 };
 
 
@@ -200,6 +202,9 @@ int lexer_get_token(lexer_t* l)
           LEXER_LIB_COMPARISON( if (p[1] == '=') return lexer_create_token(l, LEXER_token_neq, p+1);)
         }
         goto single_char;
+    case '*':
+        LEXER_LIB_ARITH( if (p+1 != l->eof && p[1] == '=') return lexer_create_token(l, LEXER_token_muleq, p+1);)
+        goto single_char;
     case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
     #ifdef LEXER_decimal_ints
     {
@@ -242,6 +247,7 @@ static void lexer_print_token(lexer_t *l)
     case LEXER_token_lseq: printf("<="); break;
     case LEXER_token_neq: printf("!="); break;
     case LEXER_token_js_neq: printf("!=="); break;
+    case LEXER_token_muleq: printf("*="); break;
     default:
       if (l->token >= 0 && l->token < 256)
         printf("%c", (int) l->token);
