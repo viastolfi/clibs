@@ -32,6 +32,8 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 #define LEXER_LIB_COMPARISON    Y  // "=="              LEXER_token_eqeq
 #define LEXER_LIB_JS_COMPARISON Y  // "==="             LEXER_token_eqeqeq
 #define LEXER_LIB_DOUBLE_ARROW  Y  // "=>"              LEXER_token_darrow
+#define LEXER_LIB_GREATER_EQUAL Y  // ">="              LEXER_token_gteq
+#define LEXER_LIB_LESSER_EQUAL  Y  // "<="              LEXER_token_lseq
 
 // TODO: add all other possible token
 
@@ -68,7 +70,11 @@ enum
   LEXER_token_eq,
   LEXER_token_eqeq,
   LEXER_token_eqeqeq,
-  LEXER_token_darrow
+  LEXER_token_darrow,
+  LEXER_token_gt,
+  LEXER_token_gteq,
+  LEXER_token_ls,
+  LEXER_token_lseq
 };
 
 
@@ -181,6 +187,16 @@ int lexer_get_token(lexer_t* l)
         }
       }
       goto single_char;
+    case '<':
+      if (p + 1 != l->eof) {
+        LEXER_LIB_LESSER_EQUAL( if (p[1] == '=') return lexer_create_token(l, LEXER_token_lseq, p+1);)
+      }
+      goto single_char;
+    case '>':
+      if (p + 1 != l->eof) {
+        LEXER_LIB_GREATER_EQUAL( if (p[1] == '=') return lexer_create_token(l, LEXER_token_gteq, p+1);)
+      }
+      goto single_char;
     case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
     #ifdef LEXER_decimal_ints
     {
@@ -222,6 +238,10 @@ static void lexer_print_token(lexer_t *l)
     case LEXER_token_eqeq: printf("=="); break;
     case LEXER_token_eqeqeq: printf("==="); break;
     case LEXER_token_darrow: printf("=>"); break;
+    case LEXER_token_gt: printf(">"); break;
+    case LEXER_token_gteq: printf(">="); break;
+    case LEXER_token_ls: printf("<"); break;
+    case LEXER_token_lseq: printf("<="); break;
     default:
       if (l->token >= 0 && l->token < 256)
         printf("%c", (int) l->token);
