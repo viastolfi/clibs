@@ -41,6 +41,7 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 #define LEXER_LIB_DOUBLE_ARROW  Y  // "=>"              LEXER_token_darrow
 #define LEXER_LIB_LOGICAL       Y  // "||"              LEXER_token_or
                                    // "&&"              LEXER_token_and
+#define LEXER_LIB_SQ_STRINGS    Y  // single quotes delimited strings LEXER_token_sqstrings
 
 // TODO: add all other possible token
 
@@ -57,9 +58,21 @@ typedef struct
   // actual point where we are at in the parsing
   const char* parse_point;
 
+  // String storage for better memory management
+  /* Why do we use a string storage :
+   * Using a string storage, we make sure that the lib doesn't do any memory management
+   * The libs keeps lightweight and doing so we ensure that it doesn't create any memory leak
+   * Any memory management is done beforehand by the user
+   */
+  char* string_storage;
+  int string_storage_len;
+
   // Token variables
   long token;
   long int_number;
+
+  char* string_value;
+  int string_len;
 } lexer_t;
 
 // We start at 256 since this is the end of the ASCII table
@@ -68,6 +81,7 @@ typedef struct
 enum 
 {
   LEXER_token_eof = 256,
+  LEXER_token_parse_error,
   LEXER_token_intlit,
   LEXER_token_plusplus,
   LEXER_token_pluseq,
@@ -85,7 +99,8 @@ enum
   LEXER_token_modeq,
   LEXER_token_diveq,
   LEXER_token_or,
-  LEXER_token_and
+  LEXER_token_and,
+  LEXER_token_sqstrings
 };
 
 // So we can #if on each token definition
@@ -101,7 +116,7 @@ extern "C" {
 #endif // __cplusplus
 
 extern int lexer_get_token(lexer_t* l);
-extern void lexer_init_lexer(lexer_t* l, const char* input_stream, const char* end_input_stream);
+extern void lexer_init_lexer(lexer_t* l, const char* input_stream, const char* end_input_stream, char* string_storage, int string_storage_len);
 
 #ifdef __cplusplus
   }
@@ -142,11 +157,42 @@ static int lexer_create_token(lexer_t* l, int token, const char* end)
   return 1;
 }
 
-void lexer_init_lexer(lexer_t* l, const char* input_stream, const char* end_input_stream) 
+static int lexer_parse_string(lexer_t* l, const char* p, int type) 
+{
+  const char* start = p;
+  // We store the actual char pointed at 'p' and advance the 'p' pointer once
+  // Example : "abc", delim = '"' and p points to a
+  char delim = *p++;
+
+  char* out = l->string_storage;
+  // To ensure we don't overflow
+  char* outend = l->string_storage + l->string_storage_len;
+
+  while (*p != delim) {
+    // TODO: parse '\\' case  
+    int n = (unsigned char) *p++;
+
+    if (out + 1 > outend) {
+      // We might need to add 'start' to the create token for better debugging
+      return lexer_create_token(l, LEXER_token_parse_error, p);
+    }
+
+    *out++ = (char) n;
+  }
+  *out = 0;
+  l->string_value = l->string_storage;
+  l->string_len = (int) (out - l->string_storage);
+  return lexer_create_token(l, type, p);
+}
+
+void lexer_init_lexer(lexer_t* l, const char* input_stream, const char* end_input_stream, char* string_storage, int string_storage_len) 
 {
   l->input_stream = input_stream;
   l->eof = end_input_stream;
   l->parse_point = input_stream;
+
+  l->string_storage = string_storage;
+  l->string_storage_len = string_storage_len;
 }
 
 int lexer_get_token(lexer_t* l) 
@@ -224,6 +270,9 @@ int lexer_get_token(lexer_t* l)
     case '&':
         LEXER_LIB_LOGICAL( if (p+1 != l->eof && p[1] == '&') return lexer_create_token(l, LEXER_token_and, p+1);)
         goto single_char;
+    case '\'':
+        LEXER_LIB_SQ_STRINGS(return lexer_parse_string(l, p, LEXER_token_sqstrings);)
+        goto single_char;
     case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
     #ifdef LEXER_decimal_ints
     {
@@ -273,6 +322,7 @@ static void lexer_print_token(lexer_t *l)
     case LEXER_token_diveq: printf("/="); break;
     case LEXER_token_or : printf("||"); break;
     case LEXER_token_and : printf("&&"); break;
+    case LEXER_token_sqstrings: printf("'%s'", l->string_value); break;
     default:
       if (l->token >= 0 && l->token < 256)
         printf("%c", (int) l->token);
