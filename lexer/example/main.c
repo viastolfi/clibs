@@ -6,7 +6,7 @@
 
 int main(void) 
 {
-  const char* text = "13 1 13 42 + += ++ - -- -= -> = == === => > < >= <= != !== ! * *= % %= / /= | || & && 'test' 'test2'"; 
+  const char* text = "13 1 13 42 + += ++ - -- -= -> = == === => > < >= <= != !== ! * *= % %= / /= | || & && 'test' 'test2' \"test\""; 
   int len = strlen(text);
 
   lexer_t lexer;

@@ -41,7 +41,8 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 #define LEXER_LIB_DOUBLE_ARROW  Y  // "=>"              LEXER_token_darrow
 #define LEXER_LIB_LOGICAL       Y  // "||"              LEXER_token_or
                                    // "&&"              LEXER_token_and
-#define LEXER_LIB_SQ_STRINGS    Y  // single quotes delimited strings LEXER_token_sqstrings
+#define LEXER_LIB_SQ_STRINGS    Y  // single quotes delimited strings LEXER_token_sqstring
+#define LEXER_LIB_DQ_STRINGS    Y  // doubles quotes delimited string LEXER_token_dqstring
 
 // TODO: add all other possible token
 
@@ -100,7 +101,8 @@ enum
   LEXER_token_diveq,
   LEXER_token_or,
   LEXER_token_and,
-  LEXER_token_sqstrings
+  LEXER_token_sqstring,
+  LEXER_token_dqstring
 };
 
 // So we can #if on each token definition
@@ -271,7 +273,10 @@ int lexer_get_token(lexer_t* l)
         LEXER_LIB_LOGICAL( if (p+1 != l->eof && p[1] == '&') return lexer_create_token(l, LEXER_token_and, p+1);)
         goto single_char;
     case '\'':
-        LEXER_LIB_SQ_STRINGS(return lexer_parse_string(l, p, LEXER_token_sqstrings);)
+        LEXER_LIB_SQ_STRINGS(return lexer_parse_string(l, p, LEXER_token_sqstring);)
+        goto single_char;
+    case '"':
+        LEXER_LIB_DQ_STRINGS(return lexer_parse_string(l, p, LEXER_token_dqstring);)
         goto single_char;
     case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
     #ifdef LEXER_decimal_ints
@@ -322,7 +327,8 @@ static void lexer_print_token(lexer_t *l)
     case LEXER_token_diveq: printf("/="); break;
     case LEXER_token_or : printf("||"); break;
     case LEXER_token_and : printf("&&"); break;
-    case LEXER_token_sqstrings: printf("'%s'", l->string_value); break;
+    case LEXER_token_sqstring: printf("'%s'", l->string_value); break;
+    case LEXER_token_dqstring: printf("\"%s\"", l->string_value); break;
     default:
       if (l->token >= 0 && l->token < 256)
         printf("%c", (int) l->token);
