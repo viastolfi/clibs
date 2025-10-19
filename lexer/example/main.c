@@ -6,13 +6,17 @@
 
 int main(void) 
 {
-  const char* text = "13 1 13 42 + += ++ - -- -= -> = == === => > < >= <= != !== ! * *= % %= / /= | || & && 'test' 'test2' \"test\""; 
+  const char* text = "'r' 'd' '\n' '\t' '\\' 'kl'";
   int len = strlen(text);
 
   lexer_t lexer;
   lexer_init_lexer(&lexer, text, text + len, malloc(255), 255);
 
   while (lexer_get_token(&lexer)) {
+    if (lexer.token == LEXER_token_parse_error) {
+      printf("\n<<<PARSE ERROR>>>\n");
+      break; 
+    }
     lexer_print_token(&lexer);
     printf("   ");
   } 

@@ -41,8 +41,9 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 #define LEXER_LIB_DOUBLE_ARROW  Y  // "=>"              LEXER_token_darrow
 #define LEXER_LIB_LOGICAL       Y  // "||"              LEXER_token_or
                                    // "&&"              LEXER_token_and
-#define LEXER_LIB_SQ_STRINGS    Y  // single quotes delimited strings LEXER_token_sqstring
+#define LEXER_LIB_SQ_STRINGS    N  // single quotes delimited strings LEXER_token_sqstring
 #define LEXER_LIB_DQ_STRINGS    Y  // doubles quotes delimited string LEXER_token_dqstring
+#define LEXER_LIB_LIT_CHARS     Y  // single quotes delimited char with escape LEXER_token_charlit
 
 // TODO: add all other possible token
 
@@ -70,7 +71,7 @@ typedef struct
 
   // Token variables
   long token;
-  long int_number;
+  long int_value;
 
   char* string_value;
   int string_len;
@@ -102,7 +103,8 @@ enum
   LEXER_token_or,
   LEXER_token_and,
   LEXER_token_sqstring,
-  LEXER_token_dqstring
+  LEXER_token_dqstring,
+  LEXER_token_charlit
 };
 
 // So we can #if on each token definition
@@ -159,6 +161,26 @@ static int lexer_create_token(lexer_t* l, int token, const char* end)
   return 1;
 }
 
+static int lexer_parse_char(const char* p, const char **q)
+{
+  if (*p == '\\') {
+    *q = p+2; 
+    switch (p[1]) {
+      case '\\': return '\\';
+      case '\'': return '\'';
+      case '"': return '"';
+      case 't': return '\t';
+      case 'f': return '\f';
+      case 'n': return '\n';
+      case 'r': return '\r';
+      case '0': return '\0'; 
+    }
+  }
+
+  *q = p+1;
+  return (unsigned char) *p;
+}
+
 static int lexer_parse_string(lexer_t* l, const char* p, int type) 
 {
   const char* start = p;
@@ -171,11 +193,19 @@ static int lexer_parse_string(lexer_t* l, const char* p, int type)
   char* outend = l->string_storage + l->string_storage_len;
 
   while (*p != delim) {
-    // TODO: parse '\\' case  
-    int n = (unsigned char) *p++;
+    int n;
+    if (*p == '\\') {
+      const char* q;
+      n = lexer_parse_char(p, &q);
+      p = q;
+      if (n < 0) 
+        return lexer_create_token(l, LEXER_token_parse_error, p); 
+    } else {
+      n = (unsigned char) *p++;
+    }
 
     if (out + 1 > outend) {
-      // We might need to add 'start' to the create token for better debugging
+      // We might need to add 'start' to the created token for better debugging
       return lexer_create_token(l, LEXER_token_parse_error, p);
     }
 
@@ -274,6 +304,17 @@ int lexer_get_token(lexer_t* l)
         goto single_char;
     case '\'':
         LEXER_LIB_SQ_STRINGS(return lexer_parse_string(l, p, LEXER_token_sqstring);)
+        LEXER_LIB_LIT_CHARS(
+        {
+          l->int_value = lexer_parse_char(p+1, &p);
+          // case the char is not an ASCII character
+          if (l->int_value < 0) 
+            return lexer_create_token(l, LEXER_token_parse_error, p);
+          // case the sq 'string' is more than one chat long
+          if (p == l->eof || *p != '\'')
+            return lexer_create_token(l, LEXER_token_parse_error, p);
+          return lexer_create_token(l, LEXER_token_charlit, p);
+        })
         goto single_char;
     case '"':
         LEXER_LIB_DQ_STRINGS(return lexer_parse_string(l, p, LEXER_token_dqstring);)
@@ -290,7 +331,7 @@ int lexer_get_token(lexer_t* l)
        * * type of the number (ie: 10 decimal number)
        * return the converted long value
        */
-      l->int_number = strtol((const char *) p, (char **) &q, 10);  
+      l->int_value = strtol((const char *) p, (char **) &q, 10);  
       #else
       // TODO: implement case of no stdlib
       return 0;
@@ -309,7 +350,7 @@ static void lexer_print_token(lexer_t *l)
   switch (l->token)
   {
     case LEXER_token_eof: printf("EOF"); break;
-    case LEXER_token_intlit: printf("#%ld", l->int_number); break;
+    case LEXER_token_intlit: printf("#%ld", l->int_value); break;
     case LEXER_token_plusplus: printf("++"); break;
     case LEXER_token_pluseq: printf("+="); break;
     case LEXER_token_minusminus: printf("--"); break;
@@ -329,6 +370,7 @@ static void lexer_print_token(lexer_t *l)
     case LEXER_token_and : printf("&&"); break;
     case LEXER_token_sqstring: printf("'%s'", l->string_value); break;
     case LEXER_token_dqstring: printf("\"%s\"", l->string_value); break;
+    case LEXER_token_charlit: printf("'%c'", (unsigned char) l->int_value); break;
     default:
       if (l->token >= 0 && l->token < 256)
         printf("%c", (int) l->token);
