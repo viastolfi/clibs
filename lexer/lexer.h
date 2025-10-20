@@ -45,6 +45,8 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 #define LEXER_LIB_DQ_STRINGS    Y  // doubles quotes delimited string LEXER_token_dqstring
 #define LEXER_LIB_LIT_CHARS     Y  // single quotes delimited char with escape LEXER_token_charlit
 #define LEXER_LIB_IDENTIFIERS   Y  // "[_a-zA-Z][_a-zA-Z0-9]*" LEXER_token_id
+#define LEXER_LIB_SL_COMMENTS   Y  // single line comments starting with '//' 
+#define LEXER_LIB_ML_COMMENTS   Y  // multiple line comments like '/*' ... '*/' 
 
 // TODO: add all other possible token
 
@@ -237,6 +239,26 @@ int lexer_get_token(lexer_t* l)
     while (p != l->eof && lexer_is_white(*p)) {
       ++p;
     }
+
+    LEXER_LIB_SL_COMMENTS(
+      if (p != l->eof && p[0] == '/' && p[1] == '/') {
+        while (p != l->eof && *p != '\n' && *p != '\r')
+          ++p;
+        continue;
+      }
+    )
+
+    LEXER_LIB_ML_COMMENTS(
+      if (p != l->eof && p[0] == '/' && p[1] == '*') {
+        p += 2;
+        while (p != l->eof && (p[0] != '*' || p[1] != '/'))
+          ++p;
+        if (p == l->eof) 
+          return lexer_create_token(l, LEXER_token_parse_error, p-1); 
+        p += 2;
+        continue;
+      }
+    )
     break;
   }
 
