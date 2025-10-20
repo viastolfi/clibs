@@ -44,6 +44,7 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 #define LEXER_LIB_SQ_STRINGS    N  // single quotes delimited strings LEXER_token_sqstring
 #define LEXER_LIB_DQ_STRINGS    Y  // doubles quotes delimited string LEXER_token_dqstring
 #define LEXER_LIB_LIT_CHARS     Y  // single quotes delimited char with escape LEXER_token_charlit
+#define LEXER_LIN_IDENTIFIERS   Y  // "[_a-zA-Z][_a-zA-Z0-9]*" LEXER_token_id
 
 // TODO: add all other possible token
 
@@ -84,6 +85,7 @@ enum
 {
   LEXER_token_eof = 256,
   LEXER_token_parse_error,
+  LEXER_token_id,
   LEXER_token_intlit,
   LEXER_token_plusplus,
   LEXER_token_pluseq,
@@ -243,9 +245,26 @@ int lexer_get_token(lexer_t* l)
 
   switch (*p) {
     default:
-      // not implemented
-      return 0;
-      
+      if (   *p > 'a' && *p < 'z'
+          || *p > 'A' && *p < 'Z'
+          || *p == '_') {
+        int n = 0;
+        l->string_value = l->string_storage;
+        l->string_len = n;
+        do {
+          if (n + 1 >= l->string_storage_len)
+            return lexer_create_token(l, LEXER_token_parse_error, p+n);
+          l->string_value[n] = p[n];
+          ++n;
+        } while (   (p[n] >= 'a' && p[n] <= 'z')
+                 || (p[n] >= 'A' && p[n] <= 'Z')
+                 || (p[n] >= '0' && p[n] <= '9') // allow digits in middle of identifier
+                 || p[n] == '_');
+        l->string_value[n] = 0;
+        // We use p+n-1 because we '\0' terminated the string and we don't count that in the parsing point
+        return lexer_create_token(l, LEXER_token_id, p+n-1);
+      }
+
     single_char:
       return lexer_create_token(l, *p, p);
 
@@ -371,6 +390,7 @@ static void lexer_print_token(lexer_t *l)
     case LEXER_token_sqstring: printf("'%s'", l->string_value); break;
     case LEXER_token_dqstring: printf("\"%s\"", l->string_value); break;
     case LEXER_token_charlit: printf("'%c'", (unsigned char) l->int_value); break;
+    case LEXER_token_id: printf("_%s", l->string_value); break;
     default:
       if (l->token >= 0 && l->token < 256)
         printf("%c", (int) l->token);

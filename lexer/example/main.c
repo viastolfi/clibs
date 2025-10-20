@@ -6,7 +6,7 @@
 
 int main(void) 
 {
-  const char* text = "'r' 'd' '\n' '\t' '\\' 'kl'";
+  const char* text = "let test _var const int9 u9";
   int len = strlen(text);
 
   lexer_t lexer;
