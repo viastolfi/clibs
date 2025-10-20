@@ -44,7 +44,7 @@ There is still no copy past from it at all. Otherwise it would make no sence to 
 #define LEXER_LIB_SQ_STRINGS    N  // single quotes delimited strings LEXER_token_sqstring
 #define LEXER_LIB_DQ_STRINGS    Y  // doubles quotes delimited string LEXER_token_dqstring
 #define LEXER_LIB_LIT_CHARS     Y  // single quotes delimited char with escape LEXER_token_charlit
-#define LEXER_LIN_IDENTIFIERS   Y  // "[_a-zA-Z][_a-zA-Z0-9]*" LEXER_token_id
+#define LEXER_LIB_IDENTIFIERS   Y  // "[_a-zA-Z][_a-zA-Z0-9]*" LEXER_token_id
 
 // TODO: add all other possible token
 
