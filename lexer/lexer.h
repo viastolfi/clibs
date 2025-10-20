@@ -355,7 +355,7 @@ int lexer_get_token(lexer_t* l)
       // TODO: implement case of no stdlib
       return 0;
       #endif // LEXER_STDLIB
-      return lexer_create_token(l, LEXER_token_intlit, q);
+      return lexer_create_token(l, LEXER_token_intlit, q-1);
     }
     // TODO: add some suffixe parsing (ie: 42U)
     #endif // LEXER_decimal_ints
