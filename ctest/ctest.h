@@ -22,6 +22,7 @@ API:
     -> entry: value that will be used on the before_each function
   ct_assert(expr, name) -> test for bool expression
   ct_assert_eq(x, y, name) -> test for equality between two objects of the same type
+  ct_assert_not_null(expr, name) -> test if expr is NULL or not
 
 EXAMPLE:
 
@@ -32,7 +33,8 @@ EXAMPLE:
   ct_test(test, simple) 
   {
     ct_assert(0, "failing test");
-    ct_assert_eq("test", "test", "success string equality test"); 
+    ct_assert_eq("test", "test", "successfull string equality test"); 
+    ct_assert_not_null(1, "successfull not null test");
   }
   ```
   No need of main function in your test files, it'll be handled by the test lib directly
