@@ -152,6 +152,25 @@ static void add_test(ct_test* t) {
     } \
   } while (0) 
 
+#define ct_assert_not_null(expr, message) \
+  do { \
+    total++; \
+    if (!(void*)(expr)) { \
+      printf(COLOR_FAIL "[FAIL] " COLOR_RESET); \
+      printf("(%s:%d) ", __FILE__, __LINE__); \
+      printf("%s\n", message); \
+      printf(COLOR_HINT "[HINT] " COLOR_RESET); \
+      printf(COLOR_SUM COLOR_BOLD "expected :" COLOR_RESET " not NULL\n"); \
+      printf(COLOR_HINT "[HINT] " COLOR_RESET); \
+      printf(COLOR_SUM COLOR_BOLD "result   :" COLOR_RESET " NULL\n"); \
+    } else { \
+      printf(COLOR_SUCCESS "[PASS] " COLOR_RESET); \
+      printf("(%s:%d) ", __FILE__, __LINE__); \
+      printf("%s\n", message); \
+      success++; \
+    } \
+  } while(0)
+
 static void ct_assert_eq_int(int x, int y, const char* message, const char* file, int line) 
 {
   total++;
