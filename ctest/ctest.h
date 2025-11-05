@@ -1,10 +1,51 @@
+/*
+------------------------------------------------------------------------------
+TEST LIB FOR C - ASTOLFI Vincent 2025
+
+<!> WARNING : this lib is greatly inspired by other c test libs like criterion, you should look at those
+
+Usage:
+
+ct_test(suite, name) 
+{
+  ct_assert(0, "failing test");
+  ct_assert_eq("test", "test", "success string equality test");  
+}
+
+API:
+  ct_test(suite, name) -> interface for the tests function
+  ct_assert(expr, name) -> test for bool expression
+  ct_assert_eq(x, y, name) -> test for equality between two objects of the same type
+
+EXAMPLE:
+
+  ```c
+  #define CTEST_LIB_IMPLEMENTATION
+  #include "ctest.h"
+
+  ct_test(test, simple) 
+  {
+    ct_assert(0, "failing test");
+    ct_assert_eq("test", "test", "success string equality test"); 
+  }
+  ```
+  No need of main function in your test files, it'll be handled by the test lib directly
+
+*/
 #ifndef CTEST_H
 #define CTEST_H
 
+#ifndef CT_PRINT
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#define CT_PRINT printf
+#endif // CT_PRINT
 
+#ifndef CT_STRCMP
+#include <string.h>
+#define CT_STRCPM
+#endif // CT_STRCMP
+
+#ifndef CT_COLOR_SETUP
 #define COLOR_RESET  "\033[0m"
 #define COLOR_SUCCESS "\033[32m"
 #define COLOR_FAIL "\033[31m"
@@ -12,6 +53,14 @@
 #define COLOR_BOLD  "\e[1m"
 #define BOLD_OFF   "\e[m"
 #define COLOR_SUM "\033[36m"
+#define CT_COLOR_SETUP
+#endif // CT_COLOR_SETUP
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+#ifdef CT_LIB_IMPLEMENTATION
 
 static int total = 0;
 static int success = 0;
@@ -140,5 +189,11 @@ int main(void)
 
   return 0;
 }
+
+#endif // CT_TEST_IMPLEMENTATION
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // CTEST_H
