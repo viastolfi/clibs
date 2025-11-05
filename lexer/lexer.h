@@ -115,10 +115,6 @@ enum
 #define Y(x) 1
 #define N(x) 0
 
-#if LEXER_LIB_DECIMAL_INTS(x)
-#define LEXER_decimal_ints
-#endif // LEXER_LIB_DECIMAL_INTS
-
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -187,7 +183,7 @@ static int lexer_parse_char(const char* p, const char **q)
 
 static int lexer_parse_string(lexer_t* l, const char* p, int type) 
 {
-  const char* start = p;
+  // const char* start = p;
   // We store the actual char pointed at 'p' and advance the 'p' pointer once
   // Example : "abc", delim = '"' and p points to a
   char delim = *p++;
@@ -267,12 +263,11 @@ int lexer_get_token(lexer_t* l)
 
   switch (*p) {
     default:
-      if (   *p > 'a' && *p < 'z'
-          || *p > 'A' && *p < 'Z'
+      if (   (*p >= 'a' && *p <= 'z')
+          || (*p >= 'A' && *p <= 'Z')
           || *p == '_') {
         int n = 0;
         l->string_value = l->string_storage;
-        l->string_len = n;
         do {
           if (n + 1 >= l->string_storage_len)
             return lexer_create_token(l, LEXER_token_parse_error, p+n);
@@ -283,6 +278,7 @@ int lexer_get_token(lexer_t* l)
                  || (p[n] >= '0' && p[n] <= '9') // allow digits in middle of identifier
                  || p[n] == '_');
         l->string_value[n] = 0;
+        l->string_len = n - 1;
         // We use p+n-1 because we '\0' terminated the string and we don't count that in the parsing point
         return lexer_create_token(l, LEXER_token_id, p+n-1);
       }
@@ -360,27 +356,21 @@ int lexer_get_token(lexer_t* l)
     case '"':
         LEXER_LIB_DQ_STRINGS(return lexer_parse_string(l, p, LEXER_token_dqstring);)
         goto single_char;
-    case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-    #ifdef LEXER_decimal_ints
-    {
-      const char* q = p;
-      #ifdef LEXER_STDLIB
-      /* strtol -> string to long converter
-       * params: 
-       * * ptr of the string we want to convert
-       * * ptr that will indicate the end of the long (ie: '12345Toto q -> 'T')
-       * * type of the number (ie: 10 decimal number)
-       * return the converted long value
-       */
-      l->int_value = strtol((const char *) p, (char **) &q, 10);  
-      #else
-      // TODO: implement case of no stdlib
-      return 0;
-      #endif // LEXER_STDLIB
-      return lexer_create_token(l, LEXER_token_intlit, q-1);
-    }
-    // TODO: add some suffixe parsing (ie: 42U)
-    #endif // LEXER_decimal_ints
+    case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+      LEXER_LIB_DECIMAL_INTS (
+        const char* q = p;
+        /* strtol -> string to long converter
+         * params: 
+         * * ptr of the string we want to convert
+         * * ptr that will indicate the end of the long (ie: '12345Toto q -> 'T')
+         * * type of the number (ie: 10 decimal number)
+         * return the converted long value
+         */
+        l->int_value = strtol((const char *) p, (char **) &q, 10);  
+        return lexer_create_token(l, LEXER_token_intlit, q-1);
+      )
+      // TODO: add some suffixe parsing (ie: 42U)
+      goto single_char;
   }
 
   return 0;
