@@ -1,3 +1,4 @@
+#define CT_LIB_IMPLEMENTATION
 #include "../ctest.h"
 
 ct_test(simple, test) 
