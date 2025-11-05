@@ -13,7 +13,13 @@ ct_test(suite, name)
 }
 
 API:
-  ct_test(suite, name) -> interface for the tests function
+  before_each(value_type, value_name, entry_definition) 
+    -> allow user to define a function that will run before all test suite
+    -> value_type: type of the value you want to use in your test
+    -> value_name: name of the value you want to use in your test
+    -> entry_definition: definition of the entry you want to use in your before_each function
+  ct_test(suite, name, <optional> entry) -> interface for the tests function
+    -> entry: value that will be used on the before_each function
   ct_assert(expr, name) -> test for bool expression
   ct_assert_eq(x, y, name) -> test for equality between two objects of the same type
 
@@ -31,7 +37,9 @@ EXAMPLE:
   ```
   No need of main function in your test files, it'll be handled by the test lib directly
 
+  see (https://github.com/viastolfi/clibs/tree/main/ctest/example) for more example
 */
+
 #ifndef CTEST_H
 #define CTEST_H
 
@@ -60,12 +68,21 @@ EXAMPLE:
 extern "C" {
 #endif // __cplusplus
 
-#ifdef CT_LIB_IMPLEMENTATION
+#ifdef CTEST_LIB_IMPLEMENTATION
 
 static int total = 0;
 static int success = 0;
 
+#define before_each(TYPE, VALUE, ENTRY) \
+  typedef TYPE T; \
+  static T VALUE; \
+  static void before_each_function(ENTRY) 
+
+
 typedef void (*ct_func)(void);
+#ifdef CTEST_BEFORE_EACH
+typedef void (*ct_before_each_func)(void);
+#endif // CTEST_BEFORE_EACH
 
 typedef struct ct_test ct_test;
 
@@ -74,6 +91,9 @@ struct ct_test
   const char* suite;
   const char* name;
   ct_func func;
+#ifdef CTEST_BEFORE_EACH
+  ct_before_each_func before;
+#endif // CTEST_BEFORE_EACH
   ct_test* next;
 };
 
@@ -84,6 +104,7 @@ static void add_test(ct_test* t) {
   ct_test_head = t;
 }
 
+#ifndef CTEST_BEFORE_EACH
 #define ct_test(SUITE, NAME) \
   static void SUITE##_##NAME##_impl(void); \
   static ct_test ct_test_##SUITE##_##NAME = { \
@@ -95,6 +116,22 @@ static void add_test(ct_test* t) {
   __attribute__((constructor)) \
   static void register_##SUITE##_##NAME(void) { add_test(&ct_test_##SUITE##_##NAME); } \
   static void SUITE##_##NAME##_impl(void) 
+#else
+#define ct_test(SUITE, NAME, ENTRY) \
+  static void SUITE##_##NAME##_impl(void); \
+  static void before_##SUITE##_##NAME(void); \
+  static ct_test ct_test_##SUITE##_##NAME = { \
+    .suite = #SUITE, \
+    .name = #NAME, \
+    .func = SUITE##_##NAME##_impl, \
+    .before = before_##SUITE##_##NAME, \
+    .next = NULL \
+  }; \
+  __attribute__((constructor)) \
+  static void register_##SUITE##_##NAME(void) { add_test(&ct_test_##SUITE##_##NAME); } \
+  static void before_##SUITE##_##NAME(void) { before_each_function(ENTRY); } \
+  static void SUITE##_##NAME##_impl(void)
+#endif // BEFORE_EACH
 
 #define ct_assert(expr, message) \
   do { \
@@ -181,6 +218,9 @@ int main(void)
   t = reversed;
   while (t) {
     printf("[" COLOR_SUM "----" COLOR_RESET "] " COLOR_BOLD "%s::%s" BOLD_OFF"\n", t->suite, t->name);
+#ifdef CTEST_BEFORE_EACH
+    t->before();
+#endif // CTEST_BEFORE_EACH
     t->func();
     t = t->next;
   }
