@@ -52,7 +52,7 @@ EXAMPLE:
 
 #ifndef CT_STRCMP
 #include <string.h>
-#define CT_STRCPM
+#define CT_STRCMP strcmp
 #endif // CT_STRCMP
 
 #ifndef CT_COLOR_SETUP
@@ -139,17 +139,17 @@ static void add_test(ct_test* t) {
   do { \
     total++; \
     if (!expr) { \
-      printf(COLOR_FAIL "[FAIL] " COLOR_RESET); \
-      printf("(%s:%d) ", __FILE__, __LINE__); \
-      printf("%s\n", message); \
-      printf(COLOR_HINT "[HINT] " COLOR_RESET); \
-      printf(COLOR_SUM COLOR_BOLD "expected :" COLOR_RESET " true\n"); \
-      printf(COLOR_HINT "[HINT] " COLOR_RESET); \
-      printf(COLOR_SUM COLOR_BOLD "result   :" COLOR_RESET " false\n"); \
+      CT_PRINT(COLOR_FAIL "[FAIL] " COLOR_RESET); \
+      CT_PRINT("(%s:%d) ", __FILE__, __LINE__); \
+      CT_PRINT("%s\n", message); \
+      CT_PRINT(COLOR_HINT "[HINT] " COLOR_RESET); \
+      CT_PRINT(COLOR_SUM COLOR_BOLD "expected :" COLOR_RESET " true\n"); \
+      CT_PRINT(COLOR_HINT "[HINT] " COLOR_RESET); \
+      CT_PRINT(COLOR_SUM COLOR_BOLD "result   :" COLOR_RESET " false\n"); \
     } else {\
-      printf(COLOR_SUCCESS "[PASS] " COLOR_RESET); \
-      printf("(%s:%d) ", __FILE__, __LINE__); \
-      printf("%s\n", message); \
+      CT_PRINT(COLOR_SUCCESS "[PASS] " COLOR_RESET); \
+      CT_PRINT("(%s:%d) ", __FILE__, __LINE__); \
+      CT_PRINT("%s\n", message); \
       success++; \
     } \
   } while (0) 
@@ -158,17 +158,17 @@ static void add_test(ct_test* t) {
   do { \
     total++; \
     if (!(void*)(expr)) { \
-      printf(COLOR_FAIL "[FAIL] " COLOR_RESET); \
-      printf("(%s:%d) ", __FILE__, __LINE__); \
-      printf("%s\n", message); \
-      printf(COLOR_HINT "[HINT] " COLOR_RESET); \
-      printf(COLOR_SUM COLOR_BOLD "expected :" COLOR_RESET " not NULL\n"); \
-      printf(COLOR_HINT "[HINT] " COLOR_RESET); \
-      printf(COLOR_SUM COLOR_BOLD "result   :" COLOR_RESET " NULL\n"); \
+      CT_PRINT(COLOR_FAIL "[FAIL] " COLOR_RESET); \
+      CT_PRINT("(%s:%d) ", __FILE__, __LINE__); \
+      CT_PRINT("%s\n", message); \
+      CT_PRINT(COLOR_HINT "[HINT] " COLOR_RESET); \
+      CT_PRINT(COLOR_SUM COLOR_BOLD "expected :" COLOR_RESET " not NULL\n"); \
+      CT_PRINT(COLOR_HINT "[HINT] " COLOR_RESET); \
+      CT_PRINT(COLOR_SUM COLOR_BOLD "result   :" COLOR_RESET " NULL\n"); \
     } else { \
-      printf(COLOR_SUCCESS "[PASS] " COLOR_RESET); \
-      printf("(%s:%d) ", __FILE__, __LINE__); \
-      printf("%s\n", message); \
+      CT_PRINT(COLOR_SUCCESS "[PASS] " COLOR_RESET); \
+      CT_PRINT("(%s:%d) ", __FILE__, __LINE__); \
+      CT_PRINT("%s\n", message); \
       success++; \
     } \
   } while(0)
@@ -177,39 +177,39 @@ static void ct_assert_eq_int(int x, int y, const char* message, const char* file
 {
   total++;
   if (x == y) {
-    printf(COLOR_SUCCESS "[PASS] " COLOR_RESET);
-    printf("(%s:%d) ", file, line); 
-    printf("%s\n", message);
+    CT_PRINT(COLOR_SUCCESS "[PASS] " COLOR_RESET);
+    CT_PRINT("(%s:%d) ", file, line); 
+    CT_PRINT("%s\n", message);
     success++; 
   }
   else {
-    printf(COLOR_FAIL "[FAIL] " COLOR_RESET);
-    printf("(%s:%d) ", file, line); 
-    printf("%s", message);
-    printf(COLOR_HINT "\n[HINT] " COLOR_RESET);
-    printf(COLOR_BOLD COLOR_SUM "expected : " COLOR_RESET BOLD_OFF "%d\n", x);
-    printf(COLOR_HINT "[HINT] " COLOR_RESET);
-    printf(COLOR_BOLD COLOR_SUM "result   : " COLOR_RESET BOLD_OFF "%d\n", y);
+    CT_PRINT(COLOR_FAIL "[FAIL] " COLOR_RESET);
+    CT_PRINT("(%s:%d) ", file, line); 
+    CT_PRINT("%s", message);
+    CT_PRINT(COLOR_HINT "\n[HINT] " COLOR_RESET);
+    CT_PRINT(COLOR_BOLD COLOR_SUM "expected : " COLOR_RESET BOLD_OFF "%d\n", x);
+    CT_PRINT(COLOR_HINT "[HINT] " COLOR_RESET);
+    CT_PRINT(COLOR_BOLD COLOR_SUM "result   : " COLOR_RESET BOLD_OFF "%d\n", y);
   }
 }
 
 static void ct_assert_eq_string(const char* x, const char* y, const char* message, const char* file, int line)
 {
   total++;
-  if (strcmp(x, y) == 0) {
-    printf(COLOR_SUCCESS "[PASS] " COLOR_RESET);
-    printf("(%s:%d) ", file, line);
-    printf("%s\n", message);
+  if (CT_STRCMP(x, y) == 0) {
+    CT_PRINT(COLOR_SUCCESS "[PASS] " COLOR_RESET);
+    CT_PRINT("(%s:%d) ", file, line);
+    CT_PRINT("%s\n", message);
     success++; 
   }
   else {
-    printf(COLOR_FAIL "[FAIL] " COLOR_RESET);
-    printf("(%s:%d) ", file, line); 
-    printf("%s", message);
-    printf(COLOR_HINT "\n[HINT] " COLOR_RESET);
-    printf(COLOR_BOLD COLOR_SUM "expected : " COLOR_RESET BOLD_OFF "\"%s\"\n", x);
-    printf(COLOR_HINT "[HINT] " COLOR_RESET);
-    printf(COLOR_BOLD COLOR_SUM "result   : " COLOR_RESET BOLD_OFF "\"%s\"\n", y);
+    CT_PRINT(COLOR_FAIL "[FAIL] " COLOR_RESET);
+    CT_PRINT("(%s:%d) ", file, line); 
+    CT_PRINT("%s", message);
+    CT_PRINT(COLOR_HINT "\n[HINT] " COLOR_RESET);
+    CT_PRINT(COLOR_BOLD COLOR_SUM "expected : " COLOR_RESET BOLD_OFF "\"%s\"\n", x);
+    CT_PRINT(COLOR_HINT "[HINT] " COLOR_RESET);
+    CT_PRINT(COLOR_BOLD COLOR_SUM "result   : " COLOR_RESET BOLD_OFF "\"%s\"\n", y);
   }
 }
 
@@ -224,7 +224,7 @@ int main(void)
 {
   ct_test* t = ct_test_head;
   if (!t) {
-    printf(COLOR_HINT "No tests registered!\n" COLOR_RESET);
+    CT_PRINT(COLOR_HINT "No tests registered!\n" COLOR_RESET);
     return 1;
   }
 
@@ -238,7 +238,7 @@ int main(void)
 
   t = reversed;
   while (t) {
-    printf("[" COLOR_SUM "----" COLOR_RESET "] " COLOR_BOLD "%s::%s" BOLD_OFF"\n", t->suite, t->name);
+    CT_PRINT("[" COLOR_SUM "----" COLOR_RESET "] " COLOR_BOLD "%s::%s" BOLD_OFF"\n", t->suite, t->name);
 #ifdef CTEST_BEFORE_EACH
     t->before();
 #endif // CTEST_BEFORE_EACH
@@ -246,7 +246,7 @@ int main(void)
     t = t->next;
   }
 
-  printf("[" COLOR_SUM "====" COLOR_RESET "] " COLOR_BOLD "Summary : " COLOR_HINT "%d " COLOR_RESET COLOR_BOLD "Test | " COLOR_SUCCESS "%d " COLOR_RESET COLOR_BOLD "Success | " COLOR_FAIL "%d " COLOR_RESET COLOR_BOLD "Fail\n" BOLD_OFF, total, success, total - success);
+  CT_PRINT("[" COLOR_SUM "====" COLOR_RESET "] " COLOR_BOLD "Summary : " COLOR_HINT "%d " COLOR_RESET COLOR_BOLD "Test | " COLOR_SUCCESS "%d " COLOR_RESET COLOR_BOLD "Success | " COLOR_FAIL "%d " COLOR_RESET COLOR_BOLD "Fail\n" BOLD_OFF, total, success, total - success);
 
   return 0;
 }
