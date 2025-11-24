@@ -75,10 +75,10 @@ extern "C" {
 static int total = 0;
 static int success = 0;
 
-#define before_each(TYPE, VALUE, ENTRY) \
+#define before_each(TYPE, VALUE, ...) \
   typedef TYPE T; \
   static T VALUE; \
-  static void before_each_function(ENTRY) 
+  static void before_each_function(__VA_ARGS__)
 
 
 typedef void (*ct_func)(void);
@@ -119,7 +119,7 @@ static void add_test(ct_test* t) {
   static void register_##SUITE##_##NAME(void) { add_test(&ct_test_##SUITE##_##NAME); } \
   static void SUITE##_##NAME##_impl(void) 
 #else
-#define ct_test(SUITE, NAME, ENTRY) \
+#define ct_test(SUITE, NAME, ...) \
   static void SUITE##_##NAME##_impl(void); \
   static void before_##SUITE##_##NAME(void); \
   static ct_test ct_test_##SUITE##_##NAME = { \
@@ -131,7 +131,7 @@ static void add_test(ct_test* t) {
   }; \
   __attribute__((constructor)) \
   static void register_##SUITE##_##NAME(void) { add_test(&ct_test_##SUITE##_##NAME); } \
-  static void before_##SUITE##_##NAME(void) { before_each_function(ENTRY); } \
+  static void before_##SUITE##_##NAME(void) { before_each_function(__VA_ARGS__); } \
   static void SUITE##_##NAME##_impl(void)
 #endif // BEFORE_EACH
 
@@ -185,10 +185,10 @@ static void ct_assert_eq_core(long long x, long long y, const char* fmt, const c
     CT_PRINT("(%s:%d) %s", file, line, message);
     CT_PRINT(COLOR_HINT "\n[HINT] " COLOR_RESET);
     CT_PRINT(COLOR_BOLD COLOR_SUM "expected : " COLOR_RESET BOLD_OFF);
-    CT_PRINT(fmt, x);
+    CT_PRINT(fmt, y);
     CT_PRINT("\n" COLOR_HINT "[HINT] " COLOR_RESET);
     CT_PRINT(COLOR_BOLD COLOR_SUM "result   : " COLOR_RESET BOLD_OFF);
-    CT_PRINT(fmt, y);
+    CT_PRINT(fmt, x);
     CT_PRINT("\n");
   }
 }
@@ -207,9 +207,9 @@ static void ct_assert_eq_string(const char* x, const char* y, const char* messag
     CT_PRINT("(%s:%d) ", file, line); 
     CT_PRINT("%s", message);
     CT_PRINT(COLOR_HINT "\n[HINT] " COLOR_RESET);
-    CT_PRINT(COLOR_BOLD COLOR_SUM "expected : " COLOR_RESET BOLD_OFF "\"%s\"\n", x);
+    CT_PRINT(COLOR_BOLD COLOR_SUM "expected : " COLOR_RESET BOLD_OFF "\"%s\"\n", y);
     CT_PRINT(COLOR_HINT "[HINT] " COLOR_RESET);
-    CT_PRINT(COLOR_BOLD COLOR_SUM "result   : " COLOR_RESET BOLD_OFF "\"%s\"\n", y);
+    CT_PRINT(COLOR_BOLD COLOR_SUM "result   : " COLOR_RESET BOLD_OFF "\"%s\"\n", x);
   }
 }
 
@@ -266,7 +266,7 @@ int main(void)
 
   CT_PRINT("[" COLOR_SUM "====" COLOR_RESET "] " COLOR_BOLD "Summary : " COLOR_HINT "%d " COLOR_RESET COLOR_BOLD "Test | " COLOR_SUCCESS "%d " COLOR_RESET COLOR_BOLD "Success | " COLOR_FAIL "%d " COLOR_RESET COLOR_BOLD "Fail\n" BOLD_OFF, total, success, total - success);
 
-  return 0;
+  return total - success;
 }
 
 #endif // CT_TEST_IMPLEMENTATION
@@ -276,4 +276,3 @@ int main(void)
 #endif // __cplusplus
 
 #endif // CTEST_H
-
