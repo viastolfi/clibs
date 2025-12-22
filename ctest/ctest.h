@@ -75,11 +75,20 @@ extern "C" {
 static int total = 0;
 static int success = 0;
 
+#ifdef CTEST_BEFORE_EACH
 #define before_each(TYPE, VALUE, ...) \
   typedef TYPE T; \
   static T VALUE; \
   static void before_each_function(__VA_ARGS__)
+#endif // CTEST_BEFORE_EACH
 
+#ifdef CTEST_BEFORE_ALL
+#define before_all(TYPE, VALUE) \
+  typedef TYPE T; \
+  static T VALUE; \
+  __attribute__((constructor)) \
+  static void before_all_function(void)
+#endif // CTEST_BEFORE_ALL
 
 typedef void (*ct_func)(void);
 #ifdef CTEST_BEFORE_EACH
@@ -272,8 +281,8 @@ int main(void)
     reversed = t;
     t = next;
   }
-
   t = reversed;
+
   while (t) {
     CT_PRINT("[" COLOR_SUM "----" COLOR_RESET "] " COLOR_BOLD "%s::%s" BOLD_OFF"\n", t->suite, t->name);
 #ifdef CTEST_BEFORE_EACH
